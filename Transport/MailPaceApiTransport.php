@@ -47,7 +47,7 @@ final class MailPaceApiTransport extends AbstractApiTransport
 
     protected function doSendApi(SentMessage $sentMessage, Email $email, Envelope $envelope): ResponseInterface
     {
-        $response = $this->client->request('POST', 'https://'.$this->getEndpoint().'/send', [
+        $response = $this->client->request('POST', 'https://' . $this->getEndpoint() . '/send', [
             'headers' => [
                 'Accept' => 'application/json',
                 'MailPace-Server-Token' => $this->key,
@@ -61,13 +61,13 @@ final class MailPaceApiTransport extends AbstractApiTransport
             $statusCode = $response->getStatusCode();
             $result = $response->toArray(false);
         } catch (DecodingExceptionInterface $e) {
-            throw new HttpTransportException('Unable to send an email: '.$response->getContent(false).sprintf(' (code %d).', $statusCode), $response, 0, $e);
+            throw new HttpTransportException('Unable to send an email: ' . $response->getContent(false) . sprintf(' (code %d).', $statusCode), $response, 0, $e);
         } catch (TransportExceptionInterface $e) {
             throw new HttpTransportException('Could not reach the remote MailPace endpoint.', $response, 0, $e);
         }
 
         if (200 !== $statusCode) {
-            throw new HttpTransportException('Unable to send an email: '.$result['Message'].sprintf(' (code %d).', $result['ErrorCode']), $response);
+            throw new HttpTransportException('Unable to send an email: ' . $result['error'] . sprintf(' (code %d).', $statusCode), $response);
         }
 
         $sentMessage->setMessageId($result['id']);
@@ -126,7 +126,7 @@ final class MailPaceApiTransport extends AbstractApiTransport
             ];
 
             if ('inline' === $disposition) {
-                $att['cid'] = 'cid:'.$filename;
+                $att['cid'] = 'cid:' . $filename;
             }
 
             $attachments[] = $att;
@@ -137,6 +137,6 @@ final class MailPaceApiTransport extends AbstractApiTransport
 
     private function getEndpoint(): ?string
     {
-        return ($this->host ?: self::HOST).($this->port ? ':'.$this->port : '');
+        return ($this->host ?: self::HOST) . ($this->port ? ':' . $this->port : '');
     }
 }
